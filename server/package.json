@@ -4,9 +4,14 @@
   "main": "server.js",
   "license": "MIT",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "start-live": "nodemon server.js",
+    "start-inspect": "nodemon --inspect server.js"
   },
   "dependencies": {
     "graphql-yoga": "^1.18.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
   }
 }
