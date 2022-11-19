@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { Routes, Route, Outlet, Link } from "react-router-dom";
+import { UserContext } from "./App";
 
 import {
   ApolloClient,
@@ -92,6 +94,9 @@ const Messages = ({ user }) => {
 };
 
 const Chat = () => {
+  const [username, setUsername] = useContext(UserContext);
+  console.log("🚀 ~ file: Chat.jsx ~ line 98 ~ Chat ~ username", username);
+
   const [state, setState] = useState({
     user: "Jack",
     content: "",

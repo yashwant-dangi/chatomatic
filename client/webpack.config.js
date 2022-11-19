@@ -5,6 +5,7 @@ const deps = require("./package.json").dependencies;
 module.exports = {
   output: {
     publicPath: "http://localhost:8080/",
+    // publicPath: "/",
   },
 
   resolve: {
@@ -13,6 +14,7 @@ module.exports = {
 
   devServer: {
     port: 8080,
+    historyApiFallback: true
   },
 
   module: {
