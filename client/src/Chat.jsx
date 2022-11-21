@@ -29,8 +29,8 @@ const client = new ApolloClient({
 });
 
 const GET_MESSAGES = gql`
-  subscription {
-    messages {
+  subscription ($groupId: String!) {
+    messages(groupId: $groupId) {
       id
       content
       user
@@ -39,13 +39,17 @@ const GET_MESSAGES = gql`
 `;
 
 const POST_MESSAGE = gql`
-  mutation ($user: String!, $content: String!) {
-    postMessage(user: $user, content: $content)
+  mutation ($user: String!, $content: String!, $groupId: String!) {
+    postMessage(user: $user, content: $content, groupId: $groupId)
   }
 `;
 
-const Messages = ({ user }) => {
-  const { data } = useSubscription(GET_MESSAGES);
+const Messages = ({ user, groupId }) => {
+  const { data } = useSubscription(GET_MESSAGES, {
+    variables: {
+      groupId,
+    },
+  });
   if (!data) {
     return null;
   } else {
@@ -94,12 +98,12 @@ const Messages = ({ user }) => {
 };
 
 const Chat = () => {
-  const [username, setUsername] = useContext(UserContext);
-  console.log("🚀 ~ file: Chat.jsx ~ line 98 ~ Chat ~ username", username);
+  const [username, setUsername, group, setGroup] = useContext(UserContext);
 
   const [state, setState] = useState({
-    user: "Jack",
+    user: username,
     content: "",
+    groupId: group,
   });
   const [postMessage] = useMutation(POST_MESSAGE);
   const onSend = () => {
@@ -115,10 +119,11 @@ const Chat = () => {
   };
   return (
     <Container>
-      <Messages user={state.user} />
+      <Messages user={state.user} groupId={state.groupId} />
       <Row>
         <Col xs={2} style={{ padding: 0 }}>
           <FormInput
+            disabled
             label="User"
             value={state.user}
             onChange={(evt) => {

@@ -1,6 +1,6 @@
 const { GraphQLServer, PubSub } = require("graphql-yoga");
 
-const messages = [];
+const messages = {};
 
 const typeDefs = `
 type Message {
@@ -12,10 +12,11 @@ type Query {
     messages: [Message!]
 }
 type Mutation {
-    postMessage(user: String!, content: String!): ID!
+    postMessage(user: String!, content: String!, groupId: String!): ID!
 }
 type Subscription {
-  messages: [Message!]
+  messages(groupId: String): [Message!]
+  chats: String!
 }
 `;
 
@@ -27,26 +28,29 @@ const resolvers = {
     messages: () => messages,
   },
   Mutation: {
-    postMessage: (parent, { user, content }) => {
-      const id = messages.length;
-      messages.push({
+    postMessage: (parent, { user, content, groupId }) => {
+      const id = messages?.[groupId]?.length || 0;
+      if (!messages[groupId]) {
+        messages[groupId] = []
+      }
+      messages[groupId]?.push({
         id,
         user,
         content,
       });
       // subscribers.forEach((fn) => fn());
-      pubsub.publish('mychannel', { messages })
+      pubsub.publish(groupId, { messages: messages[groupId] || [] })
       return id;
     },
   },
   Subscription: {
     messages: {
-      subscribe: (parent, args, { pubsub }) => {
+      subscribe: (parent, args, { pubsub, ...rest }) => {
+        const { groupId } = args;
         // const channel = Math.random().toString(36).slice(2, 15);
-        const channel = 'mychannel';
         // onMessagesUpdates(() => pubsub.publish(channel, { messages }));
-        setTimeout(() => pubsub.publish(channel, { messages }), 0);
-        return pubsub.asyncIterator(channel);
+        setTimeout(() => pubsub.publish(groupId, { messages: messages[groupId] || [] }), 0);
+        return pubsub.asyncIterator(groupId);
       },
     },
   },

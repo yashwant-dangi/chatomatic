@@ -29,8 +29,9 @@ const router = createBrowserRouter([
 
 const App = () => {
   const [username, setUsername] = useState("");
+  const [group, setGroup] = useState("");
   return (
-    <UserContext.Provider value={[username, setUsername]}>
+    <UserContext.Provider value={[username, setUsername, group, setGroup]}>
       <RouterProvider router={router} />
     </UserContext.Provider>
   );
