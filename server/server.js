@@ -20,8 +20,8 @@ type Query {
 }
 type Mutation {
     postMessage(user: String!, content: String!, groupId: String!): ID!
-    login(user: String!): String!
-    signup(email: String!, password:String!, name: String!, phone: String!): String
+    login(phone: String!, password: String!): String!
+    signup(name: String!, phone: String!): String
 }
 type Subscription {
   messages(groupId: String): [Message!]
@@ -54,7 +54,7 @@ const resolvers = {
     },
     signup: async (parent, args, context) => {
       try {
-        const { email, password, name, phone } = args;
+        const { name, phone } = args;
         const { request, response } = context;
 
         await sequelize.models.user.create({
@@ -63,8 +63,8 @@ const resolvers = {
         })
         const userJWT = jwt.sign(
           {
-            id: name,
-            email: email,
+            name: name,
+            phone: phone,
           },
           "JWT_KEY"
         );
