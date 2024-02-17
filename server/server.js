@@ -1,11 +1,11 @@
 const { createServer } = require('node:http');
 const { createYoga, createSchema, createPubSub } = require("graphql-yoga");
-const OAuth2Server = require('oauth2-server');
+const jwt = require("jsonwebtoken");
+const { useCookies } = require('@whatwg-node/server-plugin-cookies');
+const { Sequelize } = require('sequelize');
+
 
 const pubSub = createPubSub()
-const oauth = new OAuth2Server({
-  model: require('./auth-model')
-});
 
 const messages = {};
 
@@ -21,6 +21,7 @@ type Query {
 type Mutation {
     postMessage(user: String!, content: String!, groupId: String!): ID!
     login(user: String!): String!
+    signup(email: String!, password:String!): String
 }
 type Subscription {
   messages(groupId: String): [Message!]
@@ -51,19 +52,36 @@ const resolvers = {
       pubSub.publish(groupId, { messages: messages[groupId] || [] })
       return id;
     },
+    signup: (parent, args, context) => {
+      const { email, password, name } = args;
+      const { request, response } = context;
+      const userJWT = jwt.sign(
+        {
+          id: name,
+          email: email,
+        },
+        "JWT_KEY"
+      );
+      console.log("userJWT", userJWT)
+      request.session = {
+        jwt: userJWT,
+      };
+
+      context.request.cookieStore?.set({
+        name: 'authorization',
+        sameSite: 'strict',
+        secure: true,
+        // domain: 'graphql-yoga.com',
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        value: userJWT,
+        httpOnly: true
+      })
+    }
+    ,
     login: () => {
-      oauth.authenticate(request, response)
-        .then((token) => {
-          // The request was successfully authenticated.
-        })
-        .catch((err) => {
-          // The request failed authentication.
-        });
 
     },
-    // signup: () => {
 
-    // }
   },
   Subscription: {
     messages: {
@@ -92,7 +110,29 @@ const yoga = createYoga({
   schema: createSchema({
     typeDefs: typeDefs,
     resolvers: resolvers
-  })
+  }),
+  plugins: [
+    // (param1) => {
+    //   console.log("param1", param1)
+    //   return {
+    //     onParse({ params }) {
+    //       console.log('Parse started!', { params })
+    //       return result => {
+    //         console.log('Parse done!', { result })
+    //       }
+    //     },
+    //     onExecute({ args }) {
+    //       console.log('Execution started!', { args })
+    //       return {
+    //         onExecuteDone({ result }) {
+    //           console.log('Execution done!', { result })
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+    useCookies(),
+  ]
 })
 
 const server = createServer(yoga)
@@ -100,3 +140,11 @@ const server = createServer(yoga)
 server.listen(4000, () => {
   console.log(`Server on http://localhost:${4000}/`);
 });
+
+const start = async () => {
+  console.log("Starting up.......");
+  const sequelize = new Sequelize('yashwantdangi', 'yashwantdangi', null, {
+    host: 'localhost',
+    dialect: 'postgres'
+  });
+}
