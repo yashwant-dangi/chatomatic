@@ -2,7 +2,7 @@ const { createServer } = require('node:http');
 const { createYoga, createSchema, createPubSub } = require("graphql-yoga");
 const jwt = require("jsonwebtoken");
 const { useCookies } = require('@whatwg-node/server-plugin-cookies');
-const { Sequelize } = require('sequelize');
+const sequelize = require('./src/db');
 
 
 const pubSub = createPubSub()
@@ -20,8 +20,8 @@ type Query {
 }
 type Mutation {
     postMessage(user: String!, content: String!, groupId: String!): ID!
-    login(user: String!): String!
-    signup(email: String!, password:String!): String
+    login(phone: String!, password: String!): String!
+    signup(name: String!, phone: String!): String
 }
 type Subscription {
   messages(groupId: String): [Message!]
@@ -52,30 +52,42 @@ const resolvers = {
       pubSub.publish(groupId, { messages: messages[groupId] || [] })
       return id;
     },
-    signup: (parent, args, context) => {
-      const { email, password, name } = args;
-      const { request, response } = context;
-      const userJWT = jwt.sign(
-        {
-          id: name,
-          email: email,
-        },
-        "JWT_KEY"
-      );
-      console.log("userJWT", userJWT)
-      request.session = {
-        jwt: userJWT,
-      };
+    signup: async (parent, args, context) => {
+      try {
+        const { name, phone } = args;
+        const { request, response } = context;
 
-      context.request.cookieStore?.set({
-        name: 'authorization',
-        sameSite: 'strict',
-        secure: true,
-        // domain: 'graphql-yoga.com',
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-        value: userJWT,
-        httpOnly: true
-      })
+        await sequelize.models.user.create({
+          name: name,
+          phone: phone
+        })
+        const userJWT = jwt.sign(
+          {
+            name: name,
+            phone: phone,
+          },
+          "JWT_KEY"
+        );
+        console.log("userJWT", userJWT)
+        request.session = {
+          jwt: userJWT,
+        };
+
+        context.request.cookieStore?.set({
+          name: 'authorization',
+          sameSite: 'strict',
+          secure: true,
+          // domain: 'graphql-yoga.com',
+          expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          value: userJWT,
+          httpOnly: true
+        })
+      }
+      catch (error) {
+        console.log("error")
+        console.log(error)
+        throw error;
+      }
     }
     ,
     login: () => {
@@ -137,14 +149,26 @@ const yoga = createYoga({
 
 const server = createServer(yoga)
 
-server.listen(4000, () => {
-  console.log(`Server on http://localhost:${4000}/`);
-});
+async function assertDatabaseConnectionOk() {
+  console.log(`Checking database connection...`);
+  try {
+    await sequelize.authenticate();
+    console.log('Database connection OK!');
+  } catch (error) {
+    console.log('Unable to connect to the database:');
+    console.log(error.message);
+    process.exit(1);
+  }
+}
 
 const start = async () => {
   console.log("Starting up.......");
-  const sequelize = new Sequelize('yashwantdangi', 'yashwantdangi', null, {
-    host: 'localhost',
-    dialect: 'postgres'
+
+  await assertDatabaseConnectionOk();
+
+  server.listen(4000, () => {
+    console.log(`Server on http://localhost:${4000}/`);
   });
 }
+
+start();
