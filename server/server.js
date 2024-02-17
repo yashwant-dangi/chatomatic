@@ -1,4 +1,11 @@
-const { GraphQLServer, PubSub } = require("graphql-yoga");
+const { createServer } = require('node:http');
+const { createYoga, createSchema, createPubSub } = require("graphql-yoga");
+const jwt = require("jsonwebtoken");
+const { useCookies } = require('@whatwg-node/server-plugin-cookies');
+const { Sequelize } = require('sequelize');
+
+
+const pubSub = createPubSub()
 
 const messages = {};
 
@@ -13,6 +20,8 @@ type Query {
 }
 type Mutation {
     postMessage(user: String!, content: String!, groupId: String!): ID!
+    login(user: String!): String!
+    signup(email: String!, password:String!): String
 }
 type Subscription {
   messages(groupId: String): [Message!]
@@ -26,6 +35,7 @@ const onMessagesUpdates = (fn) => subscribers.push(fn);
 const resolvers = {
   Query: {
     messages: () => messages,
+    // login: () => []
   },
   Mutation: {
     postMessage: (parent, { user, content, groupId }) => {
@@ -39,26 +49,102 @@ const resolvers = {
         content,
       });
       // subscribers.forEach((fn) => fn());
-      pubsub.publish(groupId, { messages: messages[groupId] || [] })
+      pubSub.publish(groupId, { messages: messages[groupId] || [] })
       return id;
     },
+    signup: (parent, args, context) => {
+      const { email, password, name } = args;
+      const { request, response } = context;
+      const userJWT = jwt.sign(
+        {
+          id: name,
+          email: email,
+        },
+        "JWT_KEY"
+      );
+      console.log("userJWT", userJWT)
+      request.session = {
+        jwt: userJWT,
+      };
+
+      context.request.cookieStore?.set({
+        name: 'authorization',
+        sameSite: 'strict',
+        secure: true,
+        // domain: 'graphql-yoga.com',
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        value: userJWT,
+        httpOnly: true
+      })
+    }
+    ,
+    login: () => {
+
+    },
+
   },
   Subscription: {
     messages: {
-      subscribe: (parent, args, { pubsub, ...rest }) => {
+      // subscribe: (parent, args, { pubsub, ...rest }) => {
+      //   const { groupId } = args;
+      //   // const channel = Math.random().toString(36).slice(2, 15);
+      //   // onMessagesUpdates(() => pubsub.publish(channel, { messages }));
+      //   setTimeout(() => pubSub.publish(groupId, { messages: messages[groupId] || [] }), 0);
+      //   // setTimeout(() => pubsub.publish('windows', { messages: messages[groupId] || [] }), 0);
+      //   return pubSub.asycnItertor(groupId);
+      // },
+      subscribe: (parent, args) => {
         const { groupId } = args;
-        // const channel = Math.random().toString(36).slice(2, 15);
-        // onMessagesUpdates(() => pubsub.publish(channel, { messages }));
-        setTimeout(() => pubsub.publish(groupId, { messages: messages[groupId] || [] }), 0);
-        return pubsub.asyncIterator(groupId);
+        return pubSub.subscribe(groupId)
       },
+      // resolve: (parent, args) => {
+      //   console.log("in the resolve:", parent, args)
+      //   const { groupId } = args;
+      //   return messages[groupId]
+      // }
     },
   },
 };
 
-const pubsub = new PubSub();
-const server = new GraphQLServer({ typeDefs, resolvers, context: { pubsub } });
+const yoga = createYoga({
+  schema: createSchema({
+    typeDefs: typeDefs,
+    resolvers: resolvers
+  }),
+  plugins: [
+    // (param1) => {
+    //   console.log("param1", param1)
+    //   return {
+    //     onParse({ params }) {
+    //       console.log('Parse started!', { params })
+    //       return result => {
+    //         console.log('Parse done!', { result })
+    //       }
+    //     },
+    //     onExecute({ args }) {
+    //       console.log('Execution started!', { args })
+    //       return {
+    //         onExecuteDone({ result }) {
+    //           console.log('Execution done!', { result })
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+    useCookies(),
+  ]
+})
 
-server.start(({ port }) => {
-  console.log(`Server on http://localhost:${port}/`);
+const server = createServer(yoga)
+
+server.listen(4000, () => {
+  console.log(`Server on http://localhost:${4000}/`);
 });
+
+const start = async () => {
+  console.log("Starting up.......");
+  const sequelize = new Sequelize('yashwantdangi', 'yashwantdangi', null, {
+    host: 'localhost',
+    dialect: 'postgres'
+  });
+}

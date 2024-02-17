@@ -12,7 +12,14 @@ import {
   gql,
 } from "@apollo/client";
 import { WebSocketLink } from "@apollo/client/link/ws";
-import { Container, Row, Col, FormInput, Button } from "shards-react";
+import {
+  Container,
+  Row,
+  Col,
+  FormInput,
+  ButtonGroup,
+  Button,
+} from "shards-react";
 
 const link = new WebSocketLink({
   uri: "ws://localhost:4000",
@@ -44,7 +51,7 @@ const POST_MESSAGE = gql`
   }
 `;
 
-const Messages = ({ user, groupId }) => {
+const Messages = ({ user, groupId, data }) => {
   const { data } = useSubscription(GET_MESSAGES, {
     variables: {
       groupId,
@@ -55,8 +62,9 @@ const Messages = ({ user, groupId }) => {
   } else {
     return (
       <>
-        {data.messages.map(({ id, user: messageUser, content }) => (
+        {data.messages.map(({ id, user: messageUser, content }, index) => (
           <div
+            key={`${index}${content}`}
             style={{
               display: "flex",
               justifyContent: user === messageUser ? "flex-end" : "flex-start",
@@ -117,42 +125,88 @@ const Chat = () => {
       content: "",
     });
   };
+
+  const temp = [
+    { user: "user1", content: "", groupid: "mac" },
+    { user: "user1", content: "", groupid: "windows" },
+  ];
+
+  const groupChangeHandler = (data) => {
+    console.log(
+      "🚀 ~ file: Chat.jsx ~ line 134 ~ groupChangeHandler ~ data",
+      data
+    );
+    setState({
+      ...state,
+      groupId: data,
+    });
+  };
+
+  const resp = useSubscription(GET_MESSAGES, {
+    variables: {
+      groupId: state.groupId,
+    },
+  });
+  console.log("🚀 ~ file: Chat.jsx ~ line 151 ~ Chat ~ resp", resp);
+
   return (
     <Container>
-      <Messages user={state.user} groupId={state.groupId} />
       <Row>
-        <Col xs={2} style={{ padding: 0 }}>
-          <FormInput
-            disabled
-            label="User"
-            value={state.user}
-            onChange={(evt) => {
-              setState({
-                ...state,
-                user: evt.target.value,
-              });
-            }}
-          ></FormInput>
+        <Col xs={3}>
+          <Button theme="dark">Add new Group</Button>
+          <div>Active Group - {state.groupId}</div>
+          <ButtonGroup vertical>
+            {temp.map((data) => (
+              <Button
+                theme="light"
+                onClick={() => groupChangeHandler(data.groupid)}
+              >
+                {data.groupid}
+              </Button>
+            ))}
+          </ButtonGroup>
         </Col>
-        <Col xs={8}>
-          <FormInput
-            label="Content"
-            value={state.content}
-            onChange={(evt) => {
-              setState({
-                ...state,
-                content: evt.target.value,
-              });
-            }}
-            onKeyUp={(evt) => {
-              if (evt.keyCode === 13) {
-                onSend();
-              }
-            }}
-          ></FormInput>
-        </Col>
-        <Col xs={2} style={{ padding: 0 }}>
-          <Button onClick={() => onSend()}>Send</Button>
+        <Col xs={9}>
+          <Messages
+            user={state.user}
+            groupId={state.groupId}
+            data={resp.data}
+          />
+          <Row>
+            <Col xs={2} style={{ padding: 0 }}>
+              <FormInput
+                disabled
+                label="User"
+                value={state.user}
+                onChange={(evt) => {
+                  setState({
+                    ...state,
+                    user: evt.target.value,
+                  });
+                }}
+              ></FormInput>
+            </Col>
+            <Col xs={8}>
+              <FormInput
+                label="Content"
+                value={state.content}
+                onChange={(evt) => {
+                  setState({
+                    ...state,
+                    content: evt.target.value,
+                  });
+                }}
+                onKeyUp={(evt) => {
+                  if (evt.keyCode === 13) {
+                    onSend();
+                  }
+                }}
+              ></FormInput>
+            </Col>
+            <Col xs={2} style={{ padding: 0 }}>
+              <Button onClick={() => onSend()}>Send</Button>
+            </Col>
+          </Row>
         </Col>
       </Row>
     </Container>
