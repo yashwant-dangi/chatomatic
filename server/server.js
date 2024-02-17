@@ -2,7 +2,7 @@ const { createServer } = require('node:http');
 const { createYoga, createSchema, createPubSub } = require("graphql-yoga");
 const jwt = require("jsonwebtoken");
 const { useCookies } = require('@whatwg-node/server-plugin-cookies');
-const { Sequelize } = require('sequelize');
+const sequelize = require('./src/db');
 
 
 const pubSub = createPubSub()
@@ -137,14 +137,26 @@ const yoga = createYoga({
 
 const server = createServer(yoga)
 
-server.listen(4000, () => {
-  console.log(`Server on http://localhost:${4000}/`);
-});
+async function assertDatabaseConnectionOk() {
+  console.log(`Checking database connection...`);
+  try {
+    await sequelize.authenticate();
+    console.log('Database connection OK!');
+  } catch (error) {
+    console.log('Unable to connect to the database:');
+    console.log(error.message);
+    process.exit(1);
+  }
+}
 
 const start = async () => {
   console.log("Starting up.......");
-  const sequelize = new Sequelize('yashwantdangi', 'yashwantdangi', null, {
-    host: 'localhost',
-    dialect: 'postgres'
+
+  await assertDatabaseConnectionOk();
+
+  server.listen(4000, () => {
+    console.log(`Server on http://localhost:${4000}/`);
   });
 }
+
+start();
