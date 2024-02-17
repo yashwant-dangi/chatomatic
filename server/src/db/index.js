@@ -5,6 +5,8 @@ const sequelize = new Sequelize('yashwantdangi', 'yashwantdangi', null, {
     dialect: 'postgres'
 });
 
+sequelize.sync()
+
 const modelDefiners = [
     require('./models/user.model'),
 ];

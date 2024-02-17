@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-    sequelize.define('User', {
+    sequelize.define('user', {
         phone: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -11,6 +11,8 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false
         }
+    }, {
+        freezeTableName: true
     });
 }
 

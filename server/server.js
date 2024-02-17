@@ -21,7 +21,7 @@ type Query {
 type Mutation {
     postMessage(user: String!, content: String!, groupId: String!): ID!
     login(user: String!): String!
-    signup(email: String!, password:String!): String
+    signup(email: String!, password:String!, name: String!, phone: String!): String
 }
 type Subscription {
   messages(groupId: String): [Message!]
@@ -52,30 +52,42 @@ const resolvers = {
       pubSub.publish(groupId, { messages: messages[groupId] || [] })
       return id;
     },
-    signup: (parent, args, context) => {
-      const { email, password, name } = args;
-      const { request, response } = context;
-      const userJWT = jwt.sign(
-        {
-          id: name,
-          email: email,
-        },
-        "JWT_KEY"
-      );
-      console.log("userJWT", userJWT)
-      request.session = {
-        jwt: userJWT,
-      };
+    signup: async (parent, args, context) => {
+      try {
+        const { email, password, name, phone } = args;
+        const { request, response } = context;
 
-      context.request.cookieStore?.set({
-        name: 'authorization',
-        sameSite: 'strict',
-        secure: true,
-        // domain: 'graphql-yoga.com',
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-        value: userJWT,
-        httpOnly: true
-      })
+        await sequelize.models.user.create({
+          name: name,
+          phone: phone
+        })
+        const userJWT = jwt.sign(
+          {
+            id: name,
+            email: email,
+          },
+          "JWT_KEY"
+        );
+        console.log("userJWT", userJWT)
+        request.session = {
+          jwt: userJWT,
+        };
+
+        context.request.cookieStore?.set({
+          name: 'authorization',
+          sameSite: 'strict',
+          secure: true,
+          // domain: 'graphql-yoga.com',
+          expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+          value: userJWT,
+          httpOnly: true
+        })
+      }
+      catch (error) {
+        console.log("error")
+        console.log(error)
+        throw error;
+      }
     }
     ,
     login: () => {
