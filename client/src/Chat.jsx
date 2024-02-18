@@ -52,11 +52,11 @@ const POST_MESSAGE = gql`
 `;
 
 const Messages = ({ user, groupId, data }) => {
-  const { data } = useSubscription(GET_MESSAGES, {
-    variables: {
-      groupId,
-    },
-  });
+  // const { data } = useSubscription(GET_MESSAGES, {
+  //   variables: {
+  //     groupId,
+  //   },
+  // });
   if (!data) {
     return null;
   } else {
