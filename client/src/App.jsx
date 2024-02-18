@@ -6,8 +6,8 @@ import {
   Route,
 } from "react-router-dom";
 
-import "bootstrap/dist/css/bootstrap.min.css";
-import "shards-ui/dist/css/shards.min.css";
+import "./output.css";
+
 
 import "./index.css";
 import Chat from "./Chat";
@@ -41,7 +41,7 @@ const App = () => {
         <Header />
         <Routes>
           {routes.map((item) => {
-            return <Route path={item.path} element={item.element} />
+            return <Route key={item.path} path={item.path} element={item.element} />
           })}
         </Routes>
       </Router>

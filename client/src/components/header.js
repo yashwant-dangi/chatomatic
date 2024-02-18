@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
+import { Button } from '../components/ui/button'
 
 function Header() {
     const navigate = useNavigate();
@@ -10,12 +11,8 @@ function Header() {
         navigate("/signup")
     }
     return <header>
-        header
-        <h1 class="text-3xl font-bold underline">
-            Hello world!
-        </h1>
-        <button onClick={handleSignupClick}>sign up</button>
-        <button onClick={handleLoginClick}>login</button>
+        <Button onClick={handleSignupClick}>sign up</Button>
+        <Button variant="secondary" onClick={handleLoginClick}>login</Button>
     </header>
 }
 
