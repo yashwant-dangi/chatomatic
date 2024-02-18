@@ -5,6 +5,9 @@
         "paths": {
             "libs/*": [
                 "src/libs/*"
+            ],
+            "components/*": [
+                "src/components/*"
             ]
         }
     }

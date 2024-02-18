@@ -12,7 +12,8 @@ module.exports = {
   resolve: {
     extensions: [".jsx", ".js", ".json"],
     alias: {
-      "libs": path.resolve(__dirname, "src/libs")
+      "libs": path.resolve(__dirname, "src/libs"),
+      "components": path.resolve(__dirname, "src/components")
     }
   },
 
