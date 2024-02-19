@@ -14,6 +14,17 @@ import Chat from "./Chat";
 import Landing from "./Landing";
 import Signup from "./pages/signup";
 import Header from "./components/header";
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+  useQuery,
+  useSubscription,
+  useMutation,
+  gql,
+} from "@apollo/client";
+
+
 
 export const UserContext = createContext();
 
@@ -35,16 +46,22 @@ const routes = [
 const App = () => {
   const [username, setUsername] = useState("");
   const [group, setGroup] = useState("");
+  const client = new ApolloClient({
+    uri: "http://localhost:4000/graphql ",
+    cache: new InMemoryCache(),
+  });
   return (
     <UserContext.Provider value={[username, setUsername, group, setGroup]}>
-      <Router>
-        <Header />
-        <Routes>
-          {routes.map((item) => {
-            return <Route key={item.path} path={item.path} element={item.element} />
-          })}
-        </Routes>
-      </Router>
+      <ApolloProvider client={client}>
+        <Router>
+          <Header />
+          <Routes>
+            {routes.map((item) => {
+              return <Route key={item.path} path={item.path} element={item.element} />
+            })}
+          </Routes>
+        </Router>
+      </ApolloProvider>
     </UserContext.Provider >
   );
 };
