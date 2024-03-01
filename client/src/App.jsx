@@ -6,13 +6,11 @@ import {
   Route,
 } from "react-router-dom";
 
-import "./output.css";
-
-
 import "./index.css";
 import Chat from "./Chat";
 import Landing from "./Landing";
 import Signup from "./pages/signup";
+import Login from "./pages/login";
 import Header from "./components/header";
 import {
   ApolloClient,
@@ -38,7 +36,11 @@ const routes = [
     element: <Signup />,
   },
   {
-    path: "chat",
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/chat",
     element: <Chat />,
   },
 ];

@@ -8,7 +8,7 @@ function Header() {
         navigate("/signup")
     }
     const handleLoginClick = () => {
-        navigate("/signup")
+        navigate("/login")
     }
     return <header>
         <Button onClick={handleSignupClick}>sign up</Button>
