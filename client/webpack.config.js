@@ -19,7 +19,8 @@ module.exports = {
 
   devServer: {
     port: 8080,
-    historyApiFallback: true
+    historyApiFallback: true,
+    hot: true,
   },
 
   module: {
@@ -33,7 +34,7 @@ module.exports = {
       },
       {
         test: /\.css$/i,
-        use: ["style-loader", "css-loader"],
+        use: ["style-loader", "css-loader", 'postcss-loader'],
       },
       {
         test: /\.(js|jsx)$/,

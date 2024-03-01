@@ -18,10 +18,14 @@ type Message {
 type Query {
     messages: [Message!]
 }
+type User {
+  id: String!
+  name: String!
+}
 type Mutation {
     postMessage(user: String!, content: String!, groupId: String!): ID!
-    login(phone: String!, password: String!): String!
     signup(name: String!, phone: String!): String
+    login(phone: String!): User!
 }
 type Subscription {
   messages(groupId: String): [Message!]
@@ -35,7 +39,6 @@ const onMessagesUpdates = (fn) => subscribers.push(fn);
 const resolvers = {
   Query: {
     messages: () => messages,
-    // login: () => []
   },
   Mutation: {
     postMessage: (parent, { user, content, groupId }) => {
@@ -88,12 +91,15 @@ const resolvers = {
         console.log(error)
         throw error;
       }
-    }
-    ,
-    login: () => {
-
     },
-
+    login: async () => {
+      const user = await sequelize.models.user.findOne({
+        where: {
+          phone: "8398835630"
+        }
+      })
+      return user;
+    }
   },
   Subscription: {
     messages: {
