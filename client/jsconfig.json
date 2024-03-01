@@ -8,6 +8,9 @@
             ],
             "components/*": [
                 "src/components/*"
+            ],
+            "gql/*": [
+                "src/gql/*"
             ]
         }
     }

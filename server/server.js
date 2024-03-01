@@ -3,6 +3,7 @@ const { createYoga, createSchema, createPubSub } = require("graphql-yoga");
 const jwt = require("jsonwebtoken");
 const { useCookies } = require('@whatwg-node/server-plugin-cookies');
 const sequelize = require('./src/db');
+const { Op } = require('sequelize')
 
 
 const pubSub = createPubSub()
@@ -17,6 +18,7 @@ type Message {
 }
 type Query {
     messages: [Message!]
+    getFriends: [User]
 }
 type User {
   id: String!
@@ -39,6 +41,16 @@ const onMessagesUpdates = (fn) => subscribers.push(fn);
 const resolvers = {
   Query: {
     messages: () => messages,
+    getFriends: async () => {
+      const user = await sequelize.models.user.findAll({
+        where: {
+          phone: {
+            [Op.not]: '8398835630'
+          }
+        }
+      })
+      return user;
+    },
   },
   Mutation: {
     postMessage: (parent, { user, content, groupId }) => {

@@ -11,29 +11,9 @@ import {
   useMutation,
   gql,
 } from "@apollo/client";
-import { WebSocketLink } from "@apollo/client/link/ws";
-import {
-  Container,
-  Row,
-  Col,
-  FormInput,
-  ButtonGroup,
-  Button,
-} from "shards-react";
-
-const link = new WebSocketLink({
-  uri: "ws://localhost:4000",
-  options: {
-    reconnect: true,
-  },
-});
-
-const client = new ApolloClient({
-  link,
-  //   uri: "https://48p1r2roz4.sse.codesandbox.io",
-  uri: "http://localhost:4000 ",
-  cache: new InMemoryCache(),
-});
+import { Button } from 'components/ui/button';
+import { Input } from 'components/ui/input';
+import getFriendsQuery from 'gql/getFriends.graphql'
 
 const GET_MESSAGES = gql`
   subscription ($groupId: String!) {
@@ -107,6 +87,7 @@ const Messages = ({ user, groupId, data }) => {
 
 const Chat = () => {
   const [username, setUsername, group, setGroup] = useContext(UserContext);
+  const { data: friendsData, error, loading } = useQuery(getFriendsQuery);
 
   const [state, setState] = useState({
     user: username,
@@ -126,11 +107,6 @@ const Chat = () => {
     });
   };
 
-  const temp = [
-    { user: "user1", content: "", groupid: "mac" },
-    { user: "user1", content: "", groupid: "windows" },
-  ];
-
   const groupChangeHandler = (data) => {
     console.log(
       "🚀 ~ file: Chat.jsx ~ line 134 ~ groupChangeHandler ~ data",
@@ -142,39 +118,38 @@ const Chat = () => {
     });
   };
 
-  const resp = useSubscription(GET_MESSAGES, {
-    variables: {
-      groupId: state.groupId,
-    },
-  });
-  console.log("🚀 ~ file: Chat.jsx ~ line 151 ~ Chat ~ resp", resp);
+  // const resp = useSubscription(GET_MESSAGES, {
+  //   variables: {
+  //     groupId: state.groupId,
+  //   },
+  // });
+  // console.log("🚀 ~ file: Chat.jsx ~ line 151 ~ Chat ~ resp", resp);
 
   return (
-    <Container>
-      <Row>
-        <Col xs={3}>
-          <Button theme="dark">Add new Group</Button>
-          <div>Active Group - {state.groupId}</div>
-          <ButtonGroup vertical>
-            {temp.map((data) => (
-              <Button
-                theme="light"
-                onClick={() => groupChangeHandler(data.groupid)}
-              >
-                {data.groupid}
-              </Button>
-            ))}
-          </ButtonGroup>
-        </Col>
-        <Col xs={9}>
+    <div className="flex m-auto max-w-lg">
+      <div className="grid grid-flow-col gap-5">
+        <div className="grid-cols-1 flex flex-col gap-2">
+          <div>Friends List</div>
+          <div>Active Chat ID - {state.groupId}</div>
+          {friendsData?.getFriends?.map((data, index) => (
+            <Button
+              key={index}
+              theme="light"
+              onClick={() => groupChangeHandler(data.id)}
+            >
+              {data?.name}
+            </Button>
+          ))}
+        </div>
+        <div className="grid-cols-2">
           <Messages
             user={state.user}
             groupId={state.groupId}
-            data={resp.data}
+          // data={resp.data}
           />
-          <Row>
-            <Col xs={2} style={{ padding: 0 }}>
-              <FormInput
+          <div className="flex gap-2">
+            <div>
+              <Input
                 disabled
                 label="User"
                 value={state.user}
@@ -184,10 +159,10 @@ const Chat = () => {
                     user: evt.target.value,
                   });
                 }}
-              ></FormInput>
-            </Col>
-            <Col xs={8}>
-              <FormInput
+              ></Input>
+            </div>
+            <div>
+              <Input
                 label="Content"
                 value={state.content}
                 onChange={(evt) => {
@@ -201,22 +176,20 @@ const Chat = () => {
                     onSend();
                   }
                 }}
-              ></FormInput>
-            </Col>
-            <Col xs={2} style={{ padding: 0 }}>
+              ></Input>
+            </div>
+            <div>
               <Button onClick={() => onSend()}>Send</Button>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-    </Container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
 export default () => {
   return (
-    <ApolloProvider client={client}>
-      <Chat />
-    </ApolloProvider>
+    <Chat />
   );
 };
