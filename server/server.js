@@ -3,7 +3,9 @@ const { createYoga, createSchema, createPubSub } = require("graphql-yoga");
 const jwt = require("jsonwebtoken");
 const { useCookies } = require('@whatwg-node/server-plugin-cookies');
 const sequelize = require('./src/db');
-const { Op } = require('sequelize')
+const { Op } = require('sequelize');
+const { useServer } = require('graphql-ws/lib/use/ws');
+const { WebSocketServer } = require('ws');
 
 
 const pubSub = createPubSub()
@@ -127,11 +129,11 @@ const resolvers = {
         const { groupId } = args;
         return pubSub.subscribe(groupId)
       },
-      // resolve: (parent, args) => {
-      //   console.log("in the resolve:", parent, args)
-      //   const { groupId } = args;
-      //   return messages[groupId]
-      // }
+      resolve: (parent, args) => {
+        console.log("in the resolve:", parent, args)
+        const { groupId } = args;
+        return messages[groupId]
+      }
     },
   },
 };
@@ -141,6 +143,9 @@ const yoga = createYoga({
     typeDefs: typeDefs,
     resolvers: resolvers
   }),
+  graphiql: {
+    subscriptionsProtocol: 'WS'
+  },
   plugins: [
     // (param1) => {
     //   console.log("param1", param1)
@@ -166,6 +171,47 @@ const yoga = createYoga({
 })
 
 const server = createServer(yoga)
+
+const wsServer = new WebSocketServer({
+  server: server,
+  path: yoga.graphqlEndpoint
+})
+
+useServer(
+  {
+    execute: (args) => args.rootValue.execute(args),
+    subscribe: (args) => args.rootValue.subscribe(args),
+    onSubscribe: async (ctx, msg) => {
+      const { schema, execute, subscribe, contextFactory, parse, validate } = yoga.getEnveloped({
+        ...ctx,
+        req: ctx.extra.request,
+        socket: ctx.extra.socket,
+        params: msg.payload
+      })
+
+      const args = {
+        schema,
+        operationName: msg.payload.operationName,
+        document: parse(msg.payload.query),
+        variableValues: msg.payload.variables,
+        contextValue: await contextFactory(),
+        rootValue: {
+          execute,
+          subscribe
+        }
+      }
+      console.log("🚀 ~ onSubscribe: ~ args:", args)
+
+      const errors = validate(args.schema, args.document)
+      console.log("🚀 ~ onSubscribe: ~ errors:", errors)
+
+      if (errors.length) return errors
+      return args
+    }
+  },
+  wsServer
+)
+
 
 async function assertDatabaseConnectionOk() {
   console.log(`Checking database connection...`);

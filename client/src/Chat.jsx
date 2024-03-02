@@ -31,18 +31,19 @@ const POST_MESSAGE = gql`
   }
 `;
 
-const Messages = ({ user, groupId, data }) => {
-  // const { data } = useSubscription(GET_MESSAGES, {
-  //   variables: {
-  //     groupId,
-  //   },
-  // });
+const Messages = ({ user, groupId }) => {
+  const { data } = useSubscription(GET_MESSAGES, {
+    variables: {
+      groupId: 'mac',
+    },
+  });
+  console.log("🚀 ~ Messages ~ data:", data)
   if (!data) {
     return null;
   } else {
     return (
       <>
-        {data.messages.map(({ id, user: messageUser, content }, index) => (
+        {data?.messages?.map(({ id, user: messageUser, content }, index) => (
           <div
             key={`${index}${content}`}
             style={{
