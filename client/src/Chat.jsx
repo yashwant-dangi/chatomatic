@@ -7,6 +7,8 @@ import {
 } from "@apollo/client";
 import { Button } from 'components/ui/button';
 import { Input } from 'components/ui/input';
+import { client } from 'libs/client';
+import loginMutation from 'gql/login.graphql'
 import getFriendsQuery from 'gql/getFriends.graphql'
 import GET_MESSAGES from 'gql/getMessage.graphql'
 import POST_MESSAGE from 'gql/postMessage.graphql'
@@ -88,6 +90,9 @@ const Messages = ({ user, groupId }) => {
 const Chat = () => {
   const [username, setUsername, group, setGroup] = useContext(UserContext);
   const { data: friendsData, error, loading } = useQuery(getFriendsQuery);
+
+  const loginData = client.cache;
+  console.log("🚀 ~ Chat ~ loginData:", loginData)
 
   const [state, setState] = useState({
     user: 'yash', //send by
