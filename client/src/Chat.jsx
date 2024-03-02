@@ -1,43 +1,42 @@
 import React, { useState, useContext } from "react";
-import { Routes, Route, Outlet, Link } from "react-router-dom";
 import { UserContext } from "./App";
-
 import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
   useQuery,
   useSubscription,
   useMutation,
-  gql,
 } from "@apollo/client";
 import { Button } from 'components/ui/button';
 import { Input } from 'components/ui/input';
 import getFriendsQuery from 'gql/getFriends.graphql'
+import GET_MESSAGES from 'gql/getMessage.graphql'
+import POST_MESSAGE from 'gql/postMessage.graphql'
 
-const GET_MESSAGES = gql`
-  subscription ($groupId: String!) {
-    messages(groupId: $groupId) {
-      id
-      content
-      user
-    }
-  }
-`;
+// const GET_MESSAGES = gql`
+//   subscription ($groupId: String!) {
+//     messages(groupId: $groupId) {
+//       id
+//       content
+//       user
+//     }
+//   }
+// `;
 
-const POST_MESSAGE = gql`
-  mutation ($user: String!, $content: String!, $groupId: String!) {
-    postMessage(user: $user, content: $content, groupId: $groupId)
-  }
-`;
+// const POST_MESSAGE = gql`
+//   mutation ($user: String!, $content: String!, $groupId: String!) {
+//     postMessage(user: $user, content: $content, groupId: $groupId)
+//   }
+// `;
 
 const Messages = ({ user, groupId }) => {
-  const { data } = useSubscription(GET_MESSAGES, {
+  const { data, error, loading } = useSubscription(GET_MESSAGES, {
     variables: {
       groupId: 'mac',
     },
   });
   console.log("🚀 ~ Messages ~ data:", data)
+  console.log("🚀 ~ Messages ~ error:", error)
+  console.log("🚀 ~ Messages ~ loading:", loading)
+
   if (!data) {
     return null;
   } else {
