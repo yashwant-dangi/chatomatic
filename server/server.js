@@ -14,8 +14,7 @@ const messages = {};
 
 const typeDefs = `
 type Message {
-    id: ID!
-    user: String!
+    senderId: String!
     content: String!
 }
 type Query {
@@ -27,12 +26,12 @@ type User {
   name: String!
 }
 type Mutation {
-    postMessage(user: String!, content: String!, groupId: String!): ID!
+    postMessage(senderId: String!, content: String!, groupId: String!): Boolean!
     signup(name: String!, phone: String!): String
     login(phone: String!): User!
 }
 type Subscription {
-  messages(groupId: String): [Message!]
+  messages(groupId: String): Message!
   chats: String!
 }
 `;
@@ -55,19 +54,19 @@ const resolvers = {
     },
   },
   Mutation: {
-    postMessage: (parent, { user, content, groupId }) => {
-      const id = messages?.[groupId]?.length || 0;
-      if (!messages[groupId]) {
-        messages[groupId] = []
-      }
-      messages[groupId]?.push({
-        id,
-        user,
-        content,
-      });
+    postMessage: (parent, { senderId, content, groupId }) => {
+      // const id = messages?.[groupId]?.length || 0;
+      // if (!messages[groupId]) {
+      //   messages[groupId] = []
+      // }
+      // messages[groupId]?.push({
+      //   id,
+      //   user,
+      //   content,
+      // });
       // subscribers.forEach((fn) => fn());
-      pubSub.publish(groupId, { messages: messages[groupId] || [] })
-      return id;
+      pubSub.publish(groupId, { senderId, content })
+      return true;
     },
     signup: async (parent, args, context) => {
       try {
@@ -130,9 +129,10 @@ const resolvers = {
         return pubSub.subscribe(groupId)
       },
       resolve: (parent, args) => {
-        console.log("in the resolve:", parent, args)
-        const { groupId } = args;
-        return messages[groupId]
+        // console.log("in the resolve:", parent, args)
+        // const { groupId } = args;
+        // return messages[groupId]
+        return parent;
       }
     },
   },

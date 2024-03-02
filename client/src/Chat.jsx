@@ -90,13 +90,15 @@ const Chat = () => {
   const { data: friendsData, error, loading } = useQuery(getFriendsQuery);
 
   const [state, setState] = useState({
-    user: username,
+    user: 'yash', //send by
     content: "",
-    groupId: group,
+    groupId: '',
   });
-  const [postMessage] = useMutation(POST_MESSAGE);
+  const [postMessage, { data, error: postmsgerr }] = useMutation(POST_MESSAGE);
+  console.log("🚀 ~ Chat ~ postmsgerr:", postmsgerr)
   const onSend = () => {
     if (state.content.length > 0) {
+      console.log("🚀 ~ Chat ~ state:", state)
       postMessage({
         variables: state,
       });
@@ -108,13 +110,9 @@ const Chat = () => {
   };
 
   const groupChangeHandler = (data) => {
-    console.log(
-      "🚀 ~ file: Chat.jsx ~ line 134 ~ groupChangeHandler ~ data",
-      data
-    );
     setState({
       ...state,
-      groupId: data,
+      groupId: `${data?.name}_${data?.id}`,
     });
   };
 
@@ -125,17 +123,21 @@ const Chat = () => {
   // });
   // console.log("🚀 ~ file: Chat.jsx ~ line 151 ~ Chat ~ resp", resp);
 
+  console.log("🚀 ~ Chat ~ friendsData:", friendsData)
+
+
   return (
     <div className="flex m-auto max-w-lg">
       <div className="grid grid-flow-col gap-5">
         <div className="grid-cols-1 flex flex-col gap-2">
           <div>Friends List</div>
           <div>Active Chat ID - {state.groupId}</div>
+
           {friendsData?.getFriends?.map((data, index) => (
             <Button
               key={index}
               theme="light"
-              onClick={() => groupChangeHandler(data.id)}
+              onClick={() => groupChangeHandler(data)}
             >
               {data?.name}
             </Button>
