@@ -1,3 +1,3 @@
-mutation ($user: String!, $content: String!, $groupId: String!) {
-  postMessage(user: $user, content: $content, groupId: $groupId)
+mutation ($senderId: String!, $content: String!, $groupId: String!) {
+  postMessage(senderId: $senderId, content: $content, groupId: $groupId)
 }

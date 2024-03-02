@@ -12,101 +12,49 @@ import loginMutation from 'gql/login.graphql'
 import getFriendsQuery from 'gql/getFriends.graphql'
 import GET_MESSAGES from 'gql/getMessage.graphql'
 import POST_MESSAGE from 'gql/postMessage.graphql'
-
-// const GET_MESSAGES = gql`
-//   subscription ($groupId: String!) {
-//     messages(groupId: $groupId) {
-//       id
-//       content
-//       user
-//     }
-//   }
-// `;
-
-// const POST_MESSAGE = gql`
-//   mutation ($user: String!, $content: String!, $groupId: String!) {
-//     postMessage(user: $user, content: $content, groupId: $groupId)
-//   }
-// `;
-
-const Messages = ({ user, groupId }) => {
-  const { data, error, loading } = useSubscription(GET_MESSAGES, {
-    variables: {
-      groupId: 'mac',
-    },
-  });
-  console.log("🚀 ~ Messages ~ data:", data)
-  console.log("🚀 ~ Messages ~ error:", error)
-  console.log("🚀 ~ Messages ~ loading:", loading)
-
-  if (!data) {
-    return null;
-  } else {
-    return (
-      <>
-        {data?.messages?.map(({ id, user: messageUser, content }, index) => (
-          <div
-            key={`${index}${content}`}
-            style={{
-              display: "flex",
-              justifyContent: user === messageUser ? "flex-end" : "flex-start",
-              paddingBottom: "1em",
-            }}
-          >
-            {user !== messageUser && (
-              <div
-                style={{
-                  height: 50,
-                  width: 50,
-                  marginRight: "0.5em",
-                  border: "2px solid #e5e6ea",
-                  borderRadius: 25,
-                  textAlign: "center",
-                  fontSize: "18pt",
-                  paddingTop: 5,
-                }}
-              >
-                {messageUser.slice(0, 2).toUpperCase()}
-              </div>
-            )}
-            <div
-              style={{
-                background: user === messageUser ? "#58bf56" : "#e5e6ea",
-                color: user === messageUser ? "white" : "black",
-                padding: "1em",
-                borderRadius: "1em",
-                maxWidth: "60%",
-              }}
-            >
-              {content}
-            </div>
-          </div>
-        ))}
-      </>
-    );
-  }
-};
+import Messages from 'components/message';
 
 const Chat = () => {
-  const [username, setUsername, group, setGroup] = useContext(UserContext);
+  const [state, setState] = useState({
+    senderId: JSON.parse(sessionStorage.getItem('currentUser')).id, //send by
+    content: "",
+    groupId: '',
+  });
+  const [message, setMessage] = useState({})
   const { data: friendsData, error, loading } = useQuery(getFriendsQuery);
+
+  const subscriptionData = useSubscription(GET_MESSAGES, {
+    variables: {
+      groupId: JSON.parse(sessionStorage.getItem('currentUser')).name,
+    },
+  });
+  console.log("🚀 ~ Messages ~ data:", subscriptionData.data)
+  // console.log("🚀 ~ Messages ~ error:", subscriptionData.error)
+  // console.log("🚀 ~ Messages ~ loading:", subscriptionData.loading)
 
   const loginData = client.cache;
   console.log("🚀 ~ Chat ~ loginData:", loginData)
 
-  const [state, setState] = useState({
-    user: 'yash', //send by
-    content: "",
-    groupId: '',
-  });
   const [postMessage, { data, error: postmsgerr }] = useMutation(POST_MESSAGE);
-  console.log("🚀 ~ Chat ~ postmsgerr:", postmsgerr)
+
   const onSend = () => {
     if (state.content.length > 0) {
-      console.log("🚀 ~ Chat ~ state:", state)
       postMessage({
         variables: state,
       });
+      if (message[state.groupId]) {
+        const messageCopy = JSON.parse(JSON.stringify(message[state.groupId]))
+        messageCopy.push(state)
+        setMessage({
+          ...message,
+          [state.groupId]: messageCopy
+        })
+      } else {
+        setMessage({
+          ...message,
+          [state.groupId]: [state]
+        })
+      }
     }
     setState({
       ...state,
@@ -121,14 +69,7 @@ const Chat = () => {
     });
   };
 
-  // const resp = useSubscription(GET_MESSAGES, {
-  //   variables: {
-  //     groupId: state.groupId,
-  //   },
-  // });
-  // console.log("🚀 ~ file: Chat.jsx ~ line 151 ~ Chat ~ resp", resp);
-
-  console.log("🚀 ~ Chat ~ friendsData:", friendsData)
+  console.log("message", message[state.groupId])
 
 
   return (
@@ -148,55 +89,55 @@ const Chat = () => {
             </Button>
           ))}
         </div>
+
         <div className="grid-cols-2">
-          <Messages
-            user={state.user}
-            groupId={state.groupId}
-          // data={resp.data}
-          />
-          <div className="flex gap-2">
-            <div>
-              <Input
-                disabled
-                label="User"
-                value={state.user}
-                onChange={(evt) => {
-                  setState({
-                    ...state,
-                    user: evt.target.value,
-                  });
-                }}
-              ></Input>
-            </div>
-            <div>
-              <Input
-                label="Content"
-                value={state.content}
-                onChange={(evt) => {
-                  setState({
-                    ...state,
-                    content: evt.target.value,
-                  });
-                }}
-                onKeyUp={(evt) => {
-                  if (evt.keyCode === 13) {
-                    onSend();
-                  }
-                }}
-              ></Input>
-            </div>
-            <div>
-              <Button onClick={() => onSend()}>Send</Button>
-            </div>
-          </div>
+          {state.groupId ?
+            <>
+              <Messages
+                user={state.user}
+                groupId={state.groupId}
+                data={message[state.groupId]}
+              />
+              <div className="flex gap-2">
+                <div>
+                  <Input
+                    disabled
+                    label="User"
+                    value={state.user}
+                    onChange={(evt) => {
+                      setState({
+                        ...state,
+                        user: evt.target.value,
+                      });
+                    }}
+                  ></Input>
+                </div>
+                <div>
+                  <Input
+                    label="Content"
+                    value={state.content}
+                    onChange={(evt) => {
+                      setState({
+                        ...state,
+                        content: evt.target.value,
+                      });
+                    }}
+                    onKeyUp={(evt) => {
+                      if (evt.keyCode === 13) {
+                        onSend();
+                      }
+                    }}
+                  ></Input>
+                </div>
+                <div>
+                  <Button onClick={() => onSend()}>Send</Button>
+                </div>
+              </div>
+            </> : null}
         </div>
       </div>
     </div>
   );
 };
 
-export default () => {
-  return (
-    <Chat />
-  );
-};
+export default Chat;

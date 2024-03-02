@@ -43,18 +43,16 @@ const App = () => {
   const [group, setGroup] = useState("");
 
   return (
-    <UserContext.Provider value={[username, setUsername, group, setGroup]}>
-      <ApolloProvider client={client}>
-        <Router>
-          <Header />
-          <Routes>
-            {routes.map((item) => {
-              return <Route key={item.path} path={item.path} element={item.element} />
-            })}
-          </Routes>
-        </Router>
-      </ApolloProvider>
-    </UserContext.Provider >
+    <ApolloProvider client={client}>
+      <Router>
+        <Header />
+        <Routes>
+          {routes.map((item) => {
+            return <Route key={item.path} path={item.path} element={item.element} />
+          })}
+        </Routes>
+      </Router>
+    </ApolloProvider>
   );
 };
 
