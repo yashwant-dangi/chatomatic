@@ -1,142 +1,17 @@
 const { createServer } = require('node:http');
-const { createYoga, createSchema, createPubSub } = require("graphql-yoga");
+const { createYoga, createSchema } = require("graphql-yoga")
 const jwt = require("jsonwebtoken");
 const { useCookies } = require('@whatwg-node/server-plugin-cookies');
-const sequelize = require('./src/db');
-const { Op } = require('sequelize');
 const { useServer } = require('graphql-ws/lib/use/ws');
 const { WebSocketServer } = require('ws');
-
-
-const pubSub = createPubSub()
+const { typeDefs } = require('./src/schema/typeDef')
+const { resolvers } = require('./src/schema/resolvers')
+const sequelize = require('./src/db');
 
 const messages = {};
 
-const typeDefs = `
-type Message {
-    senderId: String!
-    content: String!
-}
-type Query {
-    messages: [Message!]
-    getFriends: [User]
-}
-type User {
-  id: String!
-  name: String!
-}
-type Mutation {
-    postMessage(senderId: String!, content: String!, groupId: String!): Boolean!
-    signup(name: String!, phone: String!): String
-    login(phone: String!): User!
-}
-type Subscription {
-  messages(groupId: String): Message!
-  chats: String!
-}
-`;
-
 const subscribers = [];
 const onMessagesUpdates = (fn) => subscribers.push(fn);
-
-const resolvers = {
-  Query: {
-    messages: () => messages,
-    getFriends: async () => {
-      const user = await sequelize.models.user.findAll({
-        where: {
-          phone: {
-            [Op.not]: '8398835630'
-          }
-        }
-      })
-      return user;
-    },
-  },
-  Mutation: {
-    postMessage: (parent, { senderId, content, groupId }) => {
-      // const id = messages?.[groupId]?.length || 0;
-      // if (!messages[groupId]) {
-      //   messages[groupId] = []
-      // }
-      // messages[groupId]?.push({
-      //   id,
-      //   user,
-      //   content,
-      // });
-      // subscribers.forEach((fn) => fn());
-      pubSub.publish(groupId, { senderId, content })
-      return true;
-    },
-    signup: async (parent, args, context) => {
-      try {
-        const { name, phone } = args;
-        const { request, response } = context;
-
-        await sequelize.models.user.create({
-          name: name,
-          phone: phone
-        })
-        const userJWT = jwt.sign(
-          {
-            name: name,
-            phone: phone,
-          },
-          "JWT_KEY"
-        );
-        console.log("userJWT", userJWT)
-        request.session = {
-          jwt: userJWT,
-        };
-
-        context.request.cookieStore?.set({
-          name: 'authorization',
-          sameSite: 'strict',
-          secure: true,
-          // domain: 'graphql-yoga.com',
-          expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-          value: userJWT,
-          httpOnly: true
-        })
-      }
-      catch (error) {
-        console.log("error")
-        console.log(error)
-        throw error;
-      }
-    },
-    login: async () => {
-      const user = await sequelize.models.user.findOne({
-        where: {
-          phone: "8398835630"
-        }
-      })
-      return user;
-    }
-  },
-  Subscription: {
-    messages: {
-      // subscribe: (parent, args, { pubsub, ...rest }) => {
-      //   const { groupId } = args;
-      //   // const channel = Math.random().toString(36).slice(2, 15);
-      //   // onMessagesUpdates(() => pubsub.publish(channel, { messages }));
-      //   setTimeout(() => pubSub.publish(groupId, { messages: messages[groupId] || [] }), 0);
-      //   // setTimeout(() => pubsub.publish('windows', { messages: messages[groupId] || [] }), 0);
-      //   return pubSub.asycnItertor(groupId);
-      // },
-      subscribe: (parent, args) => {
-        const { groupId } = args;
-        return pubSub.subscribe(groupId)
-      },
-      resolve: (parent, args) => {
-        // console.log("in the resolve:", parent, args)
-        // const { groupId } = args;
-        // return messages[groupId]
-        return parent;
-      }
-    },
-  },
-};
 
 const yoga = createYoga({
   schema: createSchema({

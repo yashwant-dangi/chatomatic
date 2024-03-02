@@ -9,6 +9,7 @@ sequelize.sync()
 
 const modelDefiners = [
     require('./models/user.model'),
+    require('./models/message.model'),
 ];
 
 for (const modelDefiner of modelDefiners) {
