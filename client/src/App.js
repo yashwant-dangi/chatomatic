@@ -1,4 +1,4 @@
-import React, { useState, createContext } from "react";
+import React, { createContext } from "react";
 import ReactDOM from "react-dom";
 import {
   BrowserRouter as Router,
@@ -39,9 +39,6 @@ const routes = [
 ];
 
 const App = () => {
-  const [username, setUsername] = useState("");
-  const [group, setGroup] = useState("");
-
   return (
     <ApolloProvider client={client}>
       <Router>

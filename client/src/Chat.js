@@ -1,10 +1,8 @@
-import React, { useState, useContext } from "react";
-import { UserContext } from "./App";
+import React, { useState } from "react";
 import { useQuery, useSubscription, useMutation } from "@apollo/client";
 import { Button } from "components/ui/button";
 import { Input } from "components/ui/input";
 import { client } from "libs/client";
-import loginMutation from "gql/login.graphql";
 import getFriendsQuery from "gql/getFriends.graphql";
 import GET_MESSAGES from "gql/getMessage.graphql";
 import POST_MESSAGE from "gql/postMessage.graphql";
@@ -17,38 +15,40 @@ const Chat = () => {
     groupId: "",
   });
   const [message, setMessage] = useState({});
-  const { data: friendsData, error, loading } = useQuery(getFriendsQuery);
+  const { data: friendsData } = useQuery(getFriendsQuery);
 
   const subscriptionData = useSubscription(GET_MESSAGES, {
     variables: {
       groupId: JSON.parse(sessionStorage.getItem("currentUser")).name,
     },
+    onData: ({ data: { data } }) => {
+      if (data?.messages) {
+        const incomingMessage = data?.messages;
+        const senderID = data?.messages?.senderId;
+        if (message[senderID]) {
+          const messageCopy = JSON.parse(JSON.stringify(message[senderID]));
+          messageCopy.push(incomingMessage);
+          setMessage({
+            ...message,
+            [senderID]: messageCopy,
+          });
+        } else {
+          setMessage({
+            ...message,
+            [senderID]: [incomingMessage],
+          });
+        }
+      }
+    },
   });
-  console.log("🚀 ~ Messages ~ data:", subscriptionData.data);
-  if (subscriptionData?.data?.messages) {
-    const message = subscriptionData?.data?.messages;
-    const senderID = subscriptionData?.data?.messages?.senderId;
-    if (message[senderID]) {
-      const messageCopy = JSON.parse(JSON.stringify(message[senderID]));
-      messageCopy.push(message);
-      setMessage({
-        ...message,
-        [state.groupId]: messageCopy,
-      });
-    } else {
-      setMessage({
-        ...message,
-        [state.groupId]: [state],
-      });
-    }
-  }
+
   // console.log("🚀 ~ Messages ~ error:", subscriptionData.error)
   // console.log("🚀 ~ Messages ~ loading:", subscriptionData.loading)
 
   const loginData = client.cache;
   console.log("🚀 ~ Chat ~ loginData:", loginData);
 
-  const [postMessage, { data, error: postmsgerr }] = useMutation(POST_MESSAGE);
+  const [postMessage] = useMutation(POST_MESSAGE);
 
   const onSend = () => {
     if (state.content.length > 0) {
@@ -105,11 +105,7 @@ const Chat = () => {
         <div className="grid-cols-2">
           {state.groupId ? (
             <>
-              <Messages
-                user={state.user}
-                groupId={state.groupId}
-                data={message[state.groupId]}
-              />
+              <Messages user={state.senderId} data={message[state.groupId]} />
               <div className="flex gap-2">
                 <div>
                   <Input
