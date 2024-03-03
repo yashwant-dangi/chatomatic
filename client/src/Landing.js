@@ -13,7 +13,6 @@ import { UserContext } from "./App";
 
 function Landing() {
   const navigate = useNavigate();
-  const [username, setUsername, group, setGroup] = useContext(UserContext);
   const joinHandler = (e) => {
     e.preventDefault();
     setUsername(state.username);

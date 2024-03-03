@@ -29,6 +29,24 @@ const Chat = () => {
     },
   });
   console.log("🚀 ~ Messages ~ data:", subscriptionData.data)
+  if (subscriptionData?.data?.messages) {
+    const message = subscriptionData?.data?.messages;
+    const senderID = subscriptionData?.data?.messages?.senderId;
+    if (message[senderID]) {
+      const messageCopy = JSON.parse(JSON.stringify(message[senderID]))
+      messageCopy.push(message)
+      setMessage({
+        ...message,
+        [state.groupId]: messageCopy
+      })
+    } else {
+      setMessage({
+        ...message,
+        [state.groupId]: [state]
+      })
+    }
+
+  }
   // console.log("🚀 ~ Messages ~ error:", subscriptionData.error)
   // console.log("🚀 ~ Messages ~ loading:", subscriptionData.loading)
 
