@@ -1,57 +1,52 @@
 import React, { useState, useContext } from "react";
 import { UserContext } from "./App";
-import {
-  useQuery,
-  useSubscription,
-  useMutation,
-} from "@apollo/client";
-import { Button } from 'components/ui/button';
-import { Input } from 'components/ui/input';
-import { client } from 'libs/client';
-import loginMutation from 'gql/login.graphql'
-import getFriendsQuery from 'gql/getFriends.graphql'
-import GET_MESSAGES from 'gql/getMessage.graphql'
-import POST_MESSAGE from 'gql/postMessage.graphql'
-import Messages from 'components/message';
+import { useQuery, useSubscription, useMutation } from "@apollo/client";
+import { Button } from "components/ui/button";
+import { Input } from "components/ui/input";
+import { client } from "libs/client";
+import loginMutation from "gql/login.graphql";
+import getFriendsQuery from "gql/getFriends.graphql";
+import GET_MESSAGES from "gql/getMessage.graphql";
+import POST_MESSAGE from "gql/postMessage.graphql";
+import Messages from "components/message";
 
 const Chat = () => {
   const [state, setState] = useState({
-    senderId: JSON.parse(sessionStorage.getItem('currentUser')).id, //send by
+    senderId: JSON.parse(sessionStorage.getItem("currentUser")).id, //send by
     content: "",
-    groupId: '',
+    groupId: "",
   });
-  const [message, setMessage] = useState({})
+  const [message, setMessage] = useState({});
   const { data: friendsData, error, loading } = useQuery(getFriendsQuery);
 
   const subscriptionData = useSubscription(GET_MESSAGES, {
     variables: {
-      groupId: JSON.parse(sessionStorage.getItem('currentUser')).name,
+      groupId: JSON.parse(sessionStorage.getItem("currentUser")).name,
     },
   });
-  console.log("🚀 ~ Messages ~ data:", subscriptionData.data)
+  console.log("🚀 ~ Messages ~ data:", subscriptionData.data);
   if (subscriptionData?.data?.messages) {
     const message = subscriptionData?.data?.messages;
     const senderID = subscriptionData?.data?.messages?.senderId;
     if (message[senderID]) {
-      const messageCopy = JSON.parse(JSON.stringify(message[senderID]))
-      messageCopy.push(message)
+      const messageCopy = JSON.parse(JSON.stringify(message[senderID]));
+      messageCopy.push(message);
       setMessage({
         ...message,
-        [state.groupId]: messageCopy
-      })
+        [state.groupId]: messageCopy,
+      });
     } else {
       setMessage({
         ...message,
-        [state.groupId]: [state]
-      })
+        [state.groupId]: [state],
+      });
     }
-
   }
   // console.log("🚀 ~ Messages ~ error:", subscriptionData.error)
   // console.log("🚀 ~ Messages ~ loading:", subscriptionData.loading)
 
   const loginData = client.cache;
-  console.log("🚀 ~ Chat ~ loginData:", loginData)
+  console.log("🚀 ~ Chat ~ loginData:", loginData);
 
   const [postMessage, { data, error: postmsgerr }] = useMutation(POST_MESSAGE);
 
@@ -61,17 +56,17 @@ const Chat = () => {
         variables: state,
       });
       if (message[state.groupId]) {
-        const messageCopy = JSON.parse(JSON.stringify(message[state.groupId]))
-        messageCopy.push(state)
+        const messageCopy = JSON.parse(JSON.stringify(message[state.groupId]));
+        messageCopy.push(state);
         setMessage({
           ...message,
-          [state.groupId]: messageCopy
-        })
+          [state.groupId]: messageCopy,
+        });
       } else {
         setMessage({
           ...message,
-          [state.groupId]: [state]
-        })
+          [state.groupId]: [state],
+        });
       }
     }
     setState({
@@ -87,8 +82,7 @@ const Chat = () => {
     });
   };
 
-  console.log("message", message[state.groupId])
-
+  console.log("message", message[state.groupId]);
 
   return (
     <div className="flex m-auto max-w-lg">
@@ -109,7 +103,7 @@ const Chat = () => {
         </div>
 
         <div className="grid-cols-2">
-          {state.groupId ?
+          {state.groupId ? (
             <>
               <Messages
                 user={state.user}
@@ -151,7 +145,8 @@ const Chat = () => {
                   <Button onClick={() => onSend()}>Send</Button>
                 </div>
               </div>
-            </> : null}
+            </>
+          ) : null}
         </div>
       </div>
     </div>
