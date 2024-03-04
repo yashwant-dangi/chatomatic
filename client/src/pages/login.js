@@ -1,42 +1,42 @@
-import React, { useState } from "react";
-import { Input } from 'components/ui/input'
-import { Button } from 'components/ui/button';
-import { gql, useMutation, useQuery } from '@apollo/client';
+import { useState } from "react";
+import { Input } from "components/ui/input";
+import { Button } from "components/ui/button";
+import { useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
-
-const loginMutation = gql`
-mutation login($phone: String!) {
-    login(phone: $phone) {
-      id
-      name
-    }
-  }
-`;
-
+import loginMutation from "gql/login.graphql";
 
 function Login() {
   const navigate = useNavigate();
-  const [phone, setPhone] = useState('');
-  const [loginFunction, { data, loading, error, client }] = useMutation(loginMutation, {
-  });
+  const [phone, setPhone] = useState("");
+  const [loginFunction, { loading, error }] = useMutation(loginMutation, {});
 
   const onSubmit = async () => {
     const resonse = await loginFunction({ variables: { phone } });
+    console.log("🚀 ~ onSubmit ~ resonse:", resonse);
     if (resonse?.data?.login?.name) {
-      return navigate('/chat')
+      sessionStorage.setItem(
+        "currentUser",
+        JSON.stringify(resonse?.data?.login)
+      );
+      return navigate("/chat");
     }
-  }
+  };
 
-  if (loading) return 'Submitting...';
+  if (loading) return "Submitting...";
   if (error) return `Submission error! ${error.message}`;
 
-
   return (
-    <div class="flex flex-col items-center my-8 mx-auto w-80 gap-4">
-      <Input placeholder="phone" name="phone" onChange={(e) => { setPhone(e.target.value) }} />
+    <div className="flex flex-col items-center my-8 mx-auto w-80 gap-4">
+      <Input
+        placeholder="phone"
+        name="phone"
+        onChange={(e) => {
+          setPhone(e.target.value);
+        }}
+      />
       <Button onClick={onSubmit}>Login</Button>
     </div>
-  )
+  );
 }
 
 export default Login;

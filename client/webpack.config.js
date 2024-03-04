@@ -13,7 +13,8 @@ module.exports = {
     extensions: [".jsx", ".js", ".json"],
     alias: {
       "libs": path.resolve(__dirname, "src/libs"),
-      "components": path.resolve(__dirname, "src/components")
+      "components": path.resolve(__dirname, "src/components"),
+      "gql": path.resolve(__dirname, "src/gql")
     }
   },
 
@@ -25,6 +26,11 @@ module.exports = {
 
   module: {
     rules: [
+      {
+        test: /\.(graphql|gql)$/,
+        exclude: /node_modules/,
+        loader: 'graphql-tag/loader',
+      },
       {
         test: /\.m?js/,
         type: "javascript/auto",

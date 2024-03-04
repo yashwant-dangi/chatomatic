@@ -1,0 +1,6 @@
+mutation login($phone: String!) {
+    login(phone: $phone) {
+      id
+      name
+    }
+  }
