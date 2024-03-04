@@ -1,6 +1,6 @@
 subscription ($groupId: String!) {
   messages(groupId: $groupId) {
     content
-    senderId
+    senderID
   }
 }

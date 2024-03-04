@@ -1,18 +1,16 @@
-import React from "react";
-
 function Messages({ user, data }) {
   if (!data) {
     return null;
   } else {
     return (
       <>
-        {data?.map(({ user: messageUser, senderId, content }, index) => {
+        {data?.map(({ user: messageUser, senderID, content }, index) => {
           return (
             <div
               key={`${index}${content}`}
               style={{
                 display: "flex",
-                justifyContent: user == senderId ? "flex-end" : "flex-start",
+                justifyContent: user == senderID ? "flex-end" : "flex-start",
                 paddingBottom: "1em",
               }}
             >
@@ -34,8 +32,8 @@ function Messages({ user, data }) {
               )}
               <div
                 style={{
-                  background: user === senderId ? "#58bf56" : "#e5e6ea",
-                  color: user === senderId ? "white" : "black",
+                  background: user === senderID ? "#58bf56" : "#e5e6ea",
+                  color: user === senderID ? "white" : "black",
                   padding: "1em",
                   borderRadius: "1em",
                   maxWidth: "60%",

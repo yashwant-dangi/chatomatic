@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery, useSubscription, useMutation } from "@apollo/client";
 import { Button } from "components/ui/button";
 import { Input } from "components/ui/input";
@@ -6,25 +6,49 @@ import { client } from "libs/client";
 import getFriendsQuery from "gql/getFriends.graphql";
 import GET_MESSAGES from "gql/getMessage.graphql";
 import POST_MESSAGE from "gql/postMessage.graphql";
+import GET_ALL_MESSAGE from "gql/getAllMessage.graphql";
 import Messages from "components/message";
+
+const currentUser = JSON.parse(sessionStorage.getItem("currentUser")).id;
 
 const Chat = () => {
   const [state, setState] = useState({
-    senderId: JSON.parse(sessionStorage.getItem("currentUser")).id, //send by
     content: "",
+    senderID: `${JSON.parse(sessionStorage.getItem("currentUser")).name}_${JSON.parse(sessionStorage.getItem("currentUser")).id}`, //send by
     groupId: "",
   });
   const [message, setMessage] = useState({});
   const { data: friendsData } = useQuery(getFriendsQuery);
+  const { data: allMessages } = useQuery(GET_ALL_MESSAGE, {
+    onCompleted: (data) => {
+      const stateMessageCopy = JSON.parse(JSON.stringify(message));
+      data?.getAllMessages?.map((item) => {
+        const senderID = item?.senderID;
+        const receiverID = item?.receiverID;
+        if (stateMessageCopy[senderID]) {
+          stateMessageCopy[senderID].push(item);
+        } else {
+          stateMessageCopy[senderID] = [item];
+        }
+
+        if (stateMessageCopy[receiverID]) {
+          stateMessageCopy[receiverID].push(item);
+        } else {
+          stateMessageCopy[receiverID] = [item];
+        }
+      });
+      setMessage(stateMessageCopy);
+    },
+  });
 
   const subscriptionData = useSubscription(GET_MESSAGES, {
     variables: {
-      groupId: JSON.parse(sessionStorage.getItem("currentUser")).name,
+      groupId: `${JSON.parse(sessionStorage.getItem("currentUser")).name}_${JSON.parse(sessionStorage.getItem("currentUser")).id}`,
     },
     onData: ({ data: { data } }) => {
       if (data?.messages) {
         const incomingMessage = data?.messages;
-        const senderID = data?.messages?.senderId;
+        const senderID = data?.messages?.senderID;
         if (message[senderID]) {
           const messageCopy = JSON.parse(JSON.stringify(message[senderID]));
           messageCopy.push(incomingMessage);
@@ -78,7 +102,8 @@ const Chat = () => {
   const groupChangeHandler = (data) => {
     setState({
       ...state,
-      groupId: `${data?.name}_${data?.id}`,
+      // groupId: `${data?.name}_${data?.id}`,
+      groupId: `${data?.id}`,
     });
   };
 
@@ -86,8 +111,8 @@ const Chat = () => {
 
   return (
     <div className="flex m-auto max-w-lg">
-      <div className="grid grid-flow-col gap-5">
-        <div className="grid-cols-1 flex flex-col gap-2">
+      <div className="grid grid-cols-[1fr_2fr] gap-5">
+        <div className="flex flex-col gap-2">
           <div>Friends List</div>
           <div>Active Chat ID - {state.groupId}</div>
 
@@ -102,10 +127,10 @@ const Chat = () => {
           ))}
         </div>
 
-        <div className="grid-cols-2">
+        <div className="">
           {state.groupId ? (
             <>
-              <Messages user={state.senderId} data={message[state.groupId]} />
+              <Messages user={currentUser} data={message[state.groupId]} />
               <div className="flex gap-2">
                 <div>
                   <Input
