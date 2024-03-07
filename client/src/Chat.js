@@ -9,12 +9,12 @@ import POST_MESSAGE from "gql/postMessage.graphql";
 import GET_ALL_MESSAGE from "gql/getAllMessage.graphql";
 import Messages from "components/message";
 
-const currentUser = JSON.parse(sessionStorage.getItem("currentUser")).id;
+const currentUser = JSON.parse(sessionStorage.getItem("currentUser"))?.id;
 
 const Chat = () => {
   const [state, setState] = useState({
     content: "",
-    senderID: `${JSON.parse(sessionStorage.getItem("currentUser")).name}_${JSON.parse(sessionStorage.getItem("currentUser")).id}`, //send by
+    senderID: `${JSON.parse(sessionStorage.getItem("currentUser")).name}_${JSON.parse(sessionStorage.getItem("currentUser"))?.id}`, //send by
     groupId: "",
   });
   const [message, setMessage] = useState({});
@@ -43,7 +43,7 @@ const Chat = () => {
 
   const subscriptionData = useSubscription(GET_MESSAGES, {
     variables: {
-      groupId: `${JSON.parse(sessionStorage.getItem("currentUser")).name}_${JSON.parse(sessionStorage.getItem("currentUser")).id}`,
+      groupId: `${JSON.parse(sessionStorage.getItem("currentUser")).name}_${JSON.parse(sessionStorage.getItem("currentUser"))?.id}`,
     },
     onData: ({ data: { data } }) => {
       if (data?.messages) {
@@ -127,12 +127,12 @@ const Chat = () => {
           ))}
         </div>
 
-        <div className="">
+        <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6 pb-0 h-4/6 overflow-scroll">
           {state.groupId ? (
             <>
               <Messages user={currentUser} data={message[state.groupId]} />
-              <div className="flex gap-2">
-                <div>
+              <div className="flex gap-2 sticky bottom-0 bg-secondary p-1">
+                {/* <div>
                   <Input
                     disabled
                     label="User"
@@ -144,11 +144,12 @@ const Chat = () => {
                       });
                     }}
                   ></Input>
-                </div>
+                </div> */}
                 <div>
                   <Input
                     label="Content"
                     value={state.content}
+                    placeholder="type your message here"
                     onChange={(evt) => {
                       setState({
                         ...state,
@@ -167,7 +168,9 @@ const Chat = () => {
                 </div>
               </div>
             </>
-          ) : null}
+          ) : (
+            <div className="">Start New Chat</div>
+          )}
         </div>
       </div>
     </div>
