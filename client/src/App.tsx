@@ -13,9 +13,7 @@ import Signup from "./pages/signup";
 import Login from "./pages/login";
 import Header from "./components/header";
 import { ApolloProvider } from "@apollo/client";
-import { client } from 'libs/client'
-
-
+import { client } from 'libs/client';
 
 export const UserContext = createContext();
 
@@ -53,9 +51,4 @@ const App = () => {
   );
 };
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById("app")
-);
+export default App;
