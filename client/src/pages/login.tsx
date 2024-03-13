@@ -3,12 +3,15 @@ import { Input } from "components/ui/input";
 import { Button } from "components/ui/button";
 import { useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
-import loginMutation from "gql/login.graphql";
+// import loginMutation from "gql/login.graphql";
+import { login } from "gql/login";
+console.log("🚀 ~ login:", login)
 
 function Login() {
   const navigate = useNavigate();
   const [phone, setPhone] = useState("");
-  const [loginFunction, { loading, error }] = useMutation(loginMutation, {});
+  // const [loginFunction, { loading, error }] = useMutation(loginMutation, {});
+  const [loginFunction, { loading, error }] = useMutation(login, {});
 
   const onSubmit = async () => {
     const resonse = await loginFunction({ variables: { phone } });

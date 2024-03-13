@@ -1,6 +1,0 @@
-subscription ($groupId: String!) {
-  messages(groupId: $groupId) {
-    content
-    senderID
-  }
-}

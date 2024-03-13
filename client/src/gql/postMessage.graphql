@@ -1,3 +1,0 @@
-mutation ($senderID: String!, $content: String!, $groupId: String!) {
-  postMessage(senderID: $senderID, content: $content, groupId: $groupId)
-}

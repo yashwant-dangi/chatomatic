@@ -43,13 +43,13 @@ function Messages({ user, data }) {
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted"
                 )}
-                // style={{
-                //   background: user === senderID ? "#58bf56" : "#e5e6ea",
-                //   color: user === senderID ? "white" : "black",
-                //   padding: "1em",
-                //   borderRadius: "1em",
-                //   maxWidth: "60%",
-                // }}
+              // style={{
+              //   background: user === senderID ? "#58bf56" : "#e5e6ea",
+              //   color: user === senderID ? "white" : "black",
+              //   padding: "1em",
+              //   borderRadius: "1em",
+              //   maxWidth: "60%",
+              // }}
               >
                 {content}
               </div>
