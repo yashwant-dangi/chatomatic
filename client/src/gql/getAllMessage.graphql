@@ -1,7 +1,0 @@
-query {
-  getAllMessages {
-    content
-    senderID
-    receiverID
-  }
-}

@@ -3,6 +3,7 @@ exports.typeDefs = /* GraphQL */ `
     senderID: String!
     content: String!
     receiverID: String!
+    createdAt: String!
   }
   type Query {
     messages: [Message!]
