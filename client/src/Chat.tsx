@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery, useSubscription, useMutation } from "@apollo/client";
 import { Button } from "components/ui/button";
 import { Input } from "components/ui/input";
-import { client } from "libs/client";
 import { getFriends } from "gql/getFriends";
 import { messages } from "gql/getMessage";
 import { post_Message } from "gql/postMessage";
@@ -17,17 +16,19 @@ const currentUser = JSON.parse(
 const Chat = () => {
   const [state, setState] = useState({
     content: "",
-    senderID: `${JSON.parse(sessionStorage.getItem("currentUser") || "{}").name}_${JSON.parse(sessionStorage.getItem("currentUser") || "{}")?.id}`, //send by
+    senderID: `${
+      JSON.parse(sessionStorage.getItem("currentUser") || "{}").name
+    }_${JSON.parse(sessionStorage.getItem("currentUser") || "{}")?.id}`, //send by
     groupId: "",
   });
   const [message, setMessage] = useState({});
   const { data: friendsData } = useQuery(getFriends);
-  const { data: allMessages } = useQuery(getAllMessages, {
+  useQuery(getAllMessages, {
     onCompleted: (data) => {
       const stateMessageCopy = JSON.parse(JSON.stringify(message));
       data?.getAllMessages?.map((item) => {
-        const senderID = item?.senderID;
-        const receiverID = item?.receiverID;
+        const senderID = item.senderID;
+        const receiverID = item.receiverID;
         if (stateMessageCopy[senderID]) {
           stateMessageCopy[senderID].push(item);
         } else {
@@ -44,9 +45,11 @@ const Chat = () => {
     },
   });
 
-  const subscriptionData = useSubscription(messages, {
+  useSubscription(messages, {
     variables: {
-      groupId: `${JSON.parse(sessionStorage.getItem("currentUser") || "{}").name}_${JSON.parse(sessionStorage.getItem("currentUser") || "{}")?.id}`,
+      groupId: `${
+        JSON.parse(sessionStorage.getItem("currentUser") || "{}").name
+      }_${JSON.parse(sessionStorage.getItem("currentUser") || "{}")?.id}`,
     },
     onData: ({ data: { data } }) => {
       if (data?.messages) {
@@ -68,12 +71,6 @@ const Chat = () => {
       }
     },
   });
-
-  // console.log("🚀 ~ Messages ~ error:", subscriptionData.error)
-  // console.log("🚀 ~ Messages ~ loading:", subscriptionData.loading)
-
-  const loginData = client.cache;
-  console.log("🚀 ~ Chat ~ loginData:", loginData);
 
   const [postMessage] = useMutation(post_Message);
 
@@ -110,11 +107,9 @@ const Chat = () => {
     });
   };
 
-  console.log("message", message[state.groupId]);
-
   return (
-    <div className="m-auto w-11/12">
-      <div className="grid grid-cols-[1fr_auto_2fr] gap-4">
+    <div className="m-auto w-11/12 h-[calc(100vh-5rem-1px)] overflow-hidden">
+      <div className="grid grid-cols-[1fr_auto_2fr] gap-4 h-full">
         <div className="flex flex-col gap-2">
           <div>Friends List</div>
           <div>Active Chat ID - {state.groupId}</div>

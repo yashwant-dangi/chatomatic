@@ -41,7 +41,7 @@ const resolvers = {
       await sequelize.models.message.create({
         content: content,
         senderID: senderID?.split("_")[1],
-        receiverID: groupId?.split("_")[1],
+        receiverID: groupId,
       });
       pubSub.publish(groupId, { senderID, content });
       return true;

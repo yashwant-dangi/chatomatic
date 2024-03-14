@@ -19,6 +19,7 @@ export type Scalars = {
 export type Message = {
   __typename?: 'Message';
   content: Scalars['String']['output'];
+  createdAt: Scalars['String']['output'];
   receiverID: Scalars['String']['output'];
   senderID: Scalars['String']['output'];
 };
@@ -76,7 +77,7 @@ export type User = {
 export type GetAllMessagesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAllMessagesQuery = { __typename?: 'Query', getAllMessages?: Array<{ __typename?: 'Message', content: string, senderID: string, receiverID: string } | null> | null };
+export type GetAllMessagesQuery = { __typename?: 'Query', getAllMessages?: Array<{ __typename?: 'Message', content: string, senderID: string, receiverID: string, createdAt: string } | null> | null };
 
 export type GetFriendsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -107,7 +108,7 @@ export type PostMessageMutationVariables = Exact<{
 export type PostMessageMutation = { __typename?: 'Mutation', postMessage: boolean };
 
 
-export const GetAllMessagesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getAllMessages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getAllMessages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"senderID"}},{"kind":"Field","name":{"kind":"Name","value":"receiverID"}}]}}]}}]} as unknown as DocumentNode<GetAllMessagesQuery, GetAllMessagesQueryVariables>;
+export const GetAllMessagesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getAllMessages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getAllMessages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"senderID"}},{"kind":"Field","name":{"kind":"Name","value":"receiverID"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<GetAllMessagesQuery, GetAllMessagesQueryVariables>;
 export const GetFriendsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getFriends"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getFriends"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<GetFriendsQuery, GetFriendsQueryVariables>;
 export const MessagesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"messages"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"groupId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"messages"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"groupId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"groupId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"senderID"}}]}}]}}]} as unknown as DocumentNode<MessagesSubscription, MessagesSubscriptionVariables>;
 export const LoginDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"login"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"phone"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"login"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"phone"},"value":{"kind":"Variable","name":{"kind":"Name","value":"phone"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;

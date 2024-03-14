@@ -6,6 +6,7 @@ export const getAllMessages = graphql(/* GraphQL */ `
       content
       senderID
       receiverID
+      createdAt
     }
   }
 `);

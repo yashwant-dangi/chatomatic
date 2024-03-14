@@ -13,7 +13,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-    "\n  query getAllMessages {\n    getAllMessages {\n      content\n      senderID\n      receiverID\n    }\n  }\n": types.GetAllMessagesDocument,
+    "\n  query getAllMessages {\n    getAllMessages {\n      content\n      senderID\n      receiverID\n      createdAt\n    }\n  }\n": types.GetAllMessagesDocument,
     "\n  query getFriends {\n    getFriends {\n      name\n      id\n    }\n  }\n": types.GetFriendsDocument,
     "\n  subscription messages($groupId: String!) {\n    messages(groupId: $groupId) {\n      content\n      senderID\n    }\n  }\n": types.MessagesDocument,
     "\n  mutation login($phone: String!) {\n    login(phone: $phone) {\n      id\n      name\n    }\n  }\n": types.LoginDocument,
@@ -37,7 +37,7 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query getAllMessages {\n    getAllMessages {\n      content\n      senderID\n      receiverID\n    }\n  }\n"): (typeof documents)["\n  query getAllMessages {\n    getAllMessages {\n      content\n      senderID\n      receiverID\n    }\n  }\n"];
+export function graphql(source: "\n  query getAllMessages {\n    getAllMessages {\n      content\n      senderID\n      receiverID\n      createdAt\n    }\n  }\n"): (typeof documents)["\n  query getAllMessages {\n    getAllMessages {\n      content\n      senderID\n      receiverID\n      createdAt\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
