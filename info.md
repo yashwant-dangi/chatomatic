@@ -11,3 +11,4 @@ npx tailwindcss -i ./src/index.css -o ./src/output.css --watch
 - [ ] Add authentication
 - [ ] option to add emoji on message
 - [ ] time optimization, calcualte time string at the time of fetching to boost performance
+- [ ] Add ELK stack in backend to analyze the request and analyze data
